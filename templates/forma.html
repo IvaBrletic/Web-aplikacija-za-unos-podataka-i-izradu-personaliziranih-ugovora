@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Forma za ugovore</title>
+
+        <style>
+            .naslov {
+                color: rgb(226, 0, 116);
+                font-family: Arial, sans-serif;
+                font-weight: bold;
+            }
+
+            .naslov-glavni {
+                font-size: 32px;
+                margin-bottom: 25px;
+            }
+
+            .naslov-sekcije {
+                font-size: 24px;
+                margin-top: 30px;
+                margin-bottom: 15px;
+            }
+            .gumb {
+                display: inline-block;
+                min-width: 120px;
+                padding: 8px 14px;
+
+                text-align: center;
+                text-decoration: none;
+
+                color: white;
+                background-color: rgb(226,0,116);
+                border: 1px solid rgb(190,0,98);
+                border-radius: 4px;
+
+                font-size: 14px;
+                font-weight: bold;
+
+                cursor: pointer;
+                font-family: Arial, sans-serif;
+
+                transition: 0.2s;
+            }
+
+            .gumb:hover {
+                background-color: rgb(190,0,98);
+                border-color: rgb(160,0,82);
+            }
+
+            button.gumb {
+                appearance: none;
+                -webkit-appearance: none;
+            }
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 16px;
+            }
+
+            label {
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            input,
+            select,
+            textarea {
+                font-size: 16px;
+                padding: 6px;
+            }
+
+            input[type="radio"],
+            input[type="checkbox"] {
+                transform: scale(1.15);
+                margin-right: 6px;
+            }
+
+            button {
+                font-size: 16px;
+            }
+            .logo {
+                position: fixed;
+                right: 20px;
+                bottom: 20px;
+                width: 140px;
+                height: auto;
+            }
+            .greska {
+                max-width: 700px;
+                padding: 12px;
+                margin-bottom: 20px;
+                color: #a00000;
+                background-color: #ffe5e5;
+                border: 1px solid #cc0000;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 class="naslov naslov-glavni">Web aplikacija za izradu ugovora</h1>
+
+        {% if greska %}
+            <div class="greska">
+                {{ greska }}
+            </div>
+        {% endif %}
+
+        <form action="{{ form_action }}" method="post">
+
+            <h2 class="naslov naslov-sekcije">1. Podaci o tvrtki/obrtu</h2>
+
+            <label for="naziv">Naziv tvrtke/obrta:</label><br>
+            <input type="text" id="naziv" name="naziv" value="{{ podaci.get('naziv', '') }}" required><br><br>
+
+            <label for="oib">OIB tvrtke:</label><br>
+            <input type="text" id="oib" name="oib" value="{{ podaci.get('oib', '') }}" pattern="\d{11}" title="OIB mora imati točno 11 znamenki" required><br><br>
+
+            <label for="djelatnost">Osnovna djelatnost:</label><br>
+            <input type="text" id="djelatnost" name="djelatnost" value="{{ podaci.get('djelatnost', '') }}" required><br><br>
+
+            <label for="nkdklasifikacija">NKD klasifikacija:</label><br>
+            <input type="text" id="nkdklasifikacija" name="nkdklasifikacija" value="{{ podaci.get('nkdklasifikacija', '') }}" required><br><br>
+
+            <label for="iban">IBAN:</label><br>
+            <input type="text" id="iban" name="iban" value="{{ podaci.get('iban', '') }}" pattern="HR[0-9]{19}" maxlength="21"
+                title="IBAN mora biti u formatu HR + 19 znamenki, bez razmaka." oninput="this.value = this.value.replace(/\s/g, '').toUpperCase()" required><br><br>
+
+            <label for="maticni_broj">Matični broj:</label><br>
+            <input type="text" id="maticni_broj" name="maticni_broj" value="{{ podaci.get('maticni_broj', '') }}" required><br><br>
+
+            <label for="adresa_sjedista">Adresa sjedišta:</label><br>
+            <input type="text" id="adresa_sjedista" name="adresa_sjedista" value="{{ podaci.get('adresa_sjedista', '') }}" required><br><br>
+
+            <label for="mjesto_sjedista">Mjesto sjedišta:</label><br>
+            <input type="text" id="mjesto_sjedista" name="mjesto_sjedista" value="{{ podaci.get('mjesto_sjedista', '') }}" required><br><br>
+
+            <label for="postanski_broj">Poštanski broj:</label><br>
+            <input type="text" id="postanski_broj" name="postanski_broj" value="{{ podaci.get('postanski_broj', '') }}" pattern="[0-9]{5}" title="Poštanski broj mora imati 5 znamenki" required><br><br>
+
+            <label for="zupanija_sjedista">Županija sjedišta:</label><br>
+            <input type="text" id="zupanija_sjedista" name="zupanija_sjedista" value="{{ podaci.get('zupanija_sjedista', '') }}" required><br><br>
+
+            <label>Prihvaćate li virtualne kartice:</label><br>
+            <input type="radio" id="virtualne_kartice_da" name="virtualne_kartice" value="Da" {{ "checked" if podaci.get('virtualne_kartice') == "Da" else "" }}> Da<br>
+            <input type="radio" id="virtualne_kartice_ne" name="virtualne_kartice" value="Ne" {{ "checked" if podaci.get('virtualne_kartice') == "Ne" else "" }}> Ne<br><br>
+
+            <label>Izvor sredstava:</label><br>
+            <input type="checkbox" id="izvor_sredstava_redovito" name="izvor_sredstava" value="Redovito poslovanje" {{ "checked" if "Redovito poslovanje" in podaci.get('izvor_sredstava', "") else "" }}> Redovito poslovanje<br>
+            <input type="checkbox" id="izvor_sredstava_vlasnik" name="izvor_sredstava" value="Sredstva vlasnika/osnivača" {{ "checked" if "Sredstva vlasnika/osnivača" in podaci.get('izvor_sredstava', "") else "" }}> Sredstva vlasnika/osnivača<br>
+            <input type="checkbox" id="izvor_sredstava_kredit" name="izvor_sredstava" value="Kredit/sredstva iz EU fondova" {{ "checked" if "Kredit/sredstva iz EU fondova" in podaci.get('izvor_sredstava', "") else "" }}> Kredit/sredstva iz EU fondova<br>
+            <input type="checkbox" id="izvor_sredstava_ostalo" name="izvor_sredstava" value="Ostalo" {{ "checked" if "Ostalo" in podaci.get('izvor_sredstava', "") else "" }}> Ostalo<br>
+            <input type="text" id="izvor_ostalo" name="izvor_ostalo" value="{{ podaci.get('izvor_ostalo', '') }}" placeholder="Ako je 'Ostalo', molimo navedite" size ="30"><br><br>
+
+            <label>Očekivani godišnji promet:</label><br>
+            <input type="radio" id="promet1" name="promet" value="0-5000" {{ "checked" if podaci.get('promet') == "0-5000" else "" }}> 0-5000 EUR<br>
+            <input type="radio" id="promet2" name="promet" value="5001-20000" {{ "checked" if podaci.get('promet') == "5001-20000" else "" }}> 5001-20.0000 EUR<br>
+            <input type="radio" id="promet3" name="promet" value="20001-50000" {{ "checked" if podaci.get('promet') == "20001-50000" else "" }}> 20.001-50.000 EUR<br>
+            <input type="radio" id="promet4" name="promet" value="50001-100000" {{ "checked" if podaci.get('promet') == "50001-100000" else "" }}> 50.001-100.000 EUR<br>
+            <input type="radio" id="promet5" name="promet" value="100001-200000" {{ "checked" if podaci.get('promet') == "100001-200000" else "" }}> 100.001-200.000 EUR<br>
+            <input type="radio" id="promet6" name="promet" value="Vise od 200000" {{ "checked" if podaci.get('promet') == "Vise od 200000" else "" }}> Više od 200.000 EUR<br><br>
+
+            <label>Svrha poslovnog odnosa:</label><br>
+            <input type="checkbox" id="svrha_naplata" name="svrha" value="Naplata roba i usluga" {{ "checked" if "Naplata roba i usluga" in podaci.get('svrha', "") else "" }}> Naplata roba i usluga<br>
+            <input type="checkbox" id="svrha_donacije" name="svrha" value="Donacije" {{ "checked" if "Donacije" in podaci.get('svrha', "") else "" }}> Donacije<br>
+            <input type="checkbox" id="svrha_ostalo" name="svrha" value="Ostalo" {{ "checked" if "Ostalo" in podaci.get('svrha', "") else "" }}> Ostalo<br>
+            <input type="text" id="svrha_ostalo_da" name="svrha_ostalo" value="{{ podaci.get('svrha_ostalo', '') }}" placeholder="Ako je 'Ostalo', molimo navedite" size ="30"><br><br>
+
+            <h2 class="naslov naslov-sekcije">2. Podaci o kontakt osobi</h2>
+
+            <label>Ime i prezime kontakt osobe:</label><br>
+            <input type="text" id="kontakt_ime" name="kontakt_ime" value="{{ podaci.get('kontakt_ime', '') }}" required><br><br>
+
+            <label>E-mail kontakt osobe:</label><br>
+            <input type="email" id="kontakt_email" name="kontakt_email" value="{{ podaci.get('kontakt_email', '') }}" required><br><br>
+
+            <label>Telefon kontakt osobe:</label><br>
+            <input type="tel" id="kontakt_telefon" name="kontakt_telefon" value="{{ podaci.get('kontakt_telefon', '') }}" required><br><br>
+            
+            <label>OIB kontakt osobe/zakonskog zastupnika:</label><br>
+            <input  type="text" id="kontakt_oib" name="kontakt_oib" value="{{ podaci.get('kontakt_oib', '') }}" pattern="\d{11}" title="OIB mora imati točno 11 znamenki" required><br><br>
+
+            <label>Adresa prebivališta kontakt osobe:</label><br>
+            <input  type="text" id="kontakt_adresa" name="kontakt_adresa" value="{{ podaci.get('kontakt_adresa', '') }}" required><br><br>
+
+            <label>Državljanstvo kontakt osobe:</label><br>
+            <input type="text" id="kontakt_drzavljanstvo" name="kontakt_drzavljanstvo" value="{{ podaci.get('kontakt_drzavljanstvo', '') }}" required><br><br>
+
+            <label>Imate li drugo državljanstvo?</label><br>
+
+            <input type="radio" name="kontakt_drugo_drzavljanstvo_odabir" value="Ne"
+            {{ "checked" if not podaci.get('kontakt_drugo_drzavljanstvo') else "" }}
+            onclick="document.getElementById('kontakt_drugo_drzavljanstvo_div').style.display='none'"> Ne<br>
+
+            <input type="radio" name="kontakt_drugo_drzavljanstvo_odabir" value="Da"
+            {{ "checked" if podaci.get('kontakt_drugo_drzavljanstvo') else "" }}
+            onclick="document.getElementById('kontakt_drugo_drzavljanstvo_div').style.display='block'"> Da<br>
+
+            <div id="kontakt_drugo_drzavljanstvo_div"
+            style="display:{{ 'block' if podaci.get('kontakt_drugo_drzavljanstvo') else 'none' }};">
+                <label>Drugo državljanstvo kontakt osobe:</label><br>
+                <input type="text" name="kontakt_drugo_drzavljanstvo" value="{{ podaci.get('kontakt_drugo_drzavljanstvo', '') }}"><br><br>
+            </div>
+            <br>
+
+
+            <label>Datum rođenja kontakt osobe:</label><br>
+            <input type="date" id="kontakt_datum_rodenja" name="kontakt_datum_rodenja" value="{{ podaci.get('kontakt_datum_rodenja', '') }}" required><br><br>
+
+            <label>Funkcija kontakt osobe:</label><br>
+            <input  type="text" id="kontakt_funkcija" name="kontakt_funkcija" value="{{ podaci.get('kontakt_funkcija', '') }}" required><br><br>
+
+            <label>Broj osobne iskaznice kontakt osobe:</label><br>
+            <input  type="text" id="kontakt_broj_osobne_iskaznice" name="kontakt_broj_osobne_iskaznice" value="{{ podaci.get('kontakt_broj_osobne_iskaznice', '') }}" required><br><br>
+
+            <label>Datum isteka osobne iskaznice kontakt osobe:</label><br>
+            <input type="date" id="kontakt_datum_isteka_osobne_iskaznice" name="kontakt_datum_isteka_osobne_iskaznice" value="{{ podaci.get('kontakt_datum_isteka_osobne_iskaznice', '') }}" min="{{ danas }}" required><br><br>
+
+            <label>Mjesto izdavanja osobne iskaznice kontakt osobe:</label><br>
+            <input  type="text" id="kontakt_mjesto_izdavanja_osobne_iskaznice" name="kontakt_mjesto_izdavanja_osobne_iskaznice" value="{{ podaci.get('kontakt_mjesto_izdavanja_osobne_iskaznice', '') }}" required><br><br>
+
+            <h2 class="naslov naslov-sekcije">3. Podaci o stvarnom vlasniku</h2>
+
+            <label for="vlasnik_ime">Ime i prezime vlasnika:</label><br>
+            <input  type="text" id="vlasnik_ime" name="vlasnik_ime" value="{{ podaci.get('vlasnik_ime', '') }}" required><br><br>
+
+            <label for="vlasnik_drzavljanstvo">Državljanstvo vlasnika:</label><br>
+            <input  type="text" id="vlasnik_drzavljanstvo" name="vlasnik_drzavljanstvo" value="{{ podaci.get('vlasnik_drzavljanstvo', '') }}" required><br><br>
+
+            <label>Ima li vlasnik drugo državljanstvo?</label><br>
+            <input type="radio" name="vlasnik_drugo_drzavljanstvo_odabir" value="Ne" {{ "checked" if not podaci.get('vlasnik_drugo_drzavljanstvo') else "" }} onclick="document.getElementById('vlasnik_drugo_drzavljanstvo_div').style.display='none'"> Ne<br>
+            <input type="radio" name="vlasnik_drugo_drzavljanstvo_odabir" value="Da" {{ "checked" if podaci.get('vlasnik_drugo_drzavljanstvo') else "" }} onclick="document.getElementById('vlasnik_drugo_drzavljanstvo_div').style.display='block'"> Da<br>
+
+            <div id="vlasnik_drugo_drzavljanstvo_div" style="display:{{ 'block' if podaci.get('vlasnik_drugo_drzavljanstvo') else 'none' }};">
+
+                <label>Drugo državljanstvo vlasnika:</label><br>
+                <input type="text" name="vlasnik_drugo_drzavljanstvo" value="{{ podaci.get('vlasnik_drugo_drzavljanstvo', '') }}"><br><br>
+            </div>
+            <br>
+
+            <label>Država prebivališta vlasnika:</label><br>
+            <input type="text" id="vlasnik_drzava_prebivalista" name="vlasnik_drzava_prebivalista" value="{{ podaci.get('vlasnik_drzava_prebivalista', '') }}" required><br><br>
+
+            
+
+            <label for="vlasnik_OIB">OIB vlasnika:</label><br>
+            <input  type="text" id="vlasnik_OIB" name="vlasnik_OIB" value="{{ podaci.get('vlasnik_OIB', '') }}" pattern="\d{11}" title="OIB mora imati točno 11 znamenki" required><br><br>
+
+            <label for="vlasnik_datum_rodenja">Datum rođenja vlasnika:</label><br>
+            <input  type="date" id="vlasnik_datum_rodenja" name="vlasnik_datum_rodenja" value="{{ podaci.get('vlasnik_datum_rodenja', '') }}" required><br><br>
+
+            <label for="vlasnik_udio_vlasnistva">Udio vlasništva (%):</label><br>
+            <input  type="number" id="vlasnik_udio_vlasnistva" name="vlasnik_udio_vlasnistva" min="0" max="100" step="0.1" value="{{ podaci.get('vlasnik_udio_vlasnistva', '') }}" required><br><br>
+
+            <label>Vrsta vlasništva:</label><br>
+            <input type="radio" name="vlasnik_vrsta_vlasnistva" value="Izravni" {{ "checked" if podaci.get('vlasnik_vrsta_vlasnistva') == 'Izravni' else "" }} required> Izravni<br>
+            <input type="radio" name="vlasnik_vrsta_vlasnistva" value="Neizravni" {{ "checked" if podaci.get('vlasnik_vrsta_vlasnistva') == 'Neizravni' else "" }}> Neizravni<br>
+            <input type="radio" name="vlasnik_vrsta_vlasnistva" value="Kontrolni položaj" {{ "checked" if podaci.get('vlasnik_vrsta_vlasnistva') == 'Kontrolni položaj' else "" }}> Kontrolni položaj<br><br>
+
+            <label>Jeste li politički izložena osoba?</label><br>
+            <input  type="radio" id="vlasnik_politicki_izlozena_da" name="vlasnik_politicki_izlozena" value="Da" {{ "checked" if podaci.get('vlasnik_politicki_izlozena') == 'Da' else "" }}> Da<br>
+            <input  type="radio" id="vlasnik_politicki_izlozena_ne" name="vlasnik_politicki_izlozena" value="Ne" {{ "checked" if podaci.get('vlasnik_politicki_izlozena') == 'Ne' else "" }}> Ne<br><br>
+
+
+            <h2 class="naslov naslov-sekcije">4. Dodatni vlasnik/osnivač</h2>
+
+            <p>Ukoliko tvrtka/obrt ima više vlasnika/osnivača, molimo unesite podatke o dodatnom vlasniku/osnivaču. Ukoliko nema, ovaj dio možete preskočiti.</p>
+            <div id="dodatni_vlasnik">
+                {% for vlasnik in dodatni_vlasnici %}
+                {% set broj = loop.index %}
+
+                <h5>Dodatni vlasnik/osnivač {{ broj }}</h5>
+
+                <label>Ime i prezime:</label><br>
+                <input type="text" name="dodatni_vlasnik_ime_{{ broj }}" value="{{ vlasnik[0] }}"><br><br>
+
+                <label>OIB:</label><br>
+                <input type="text" name="dodatni_vlasnik_OIB_{{ broj }}" value="{{ vlasnik[1] }}" pattern="\d{11}"><br><br>
+
+                <label>Datum rođenja:</label><br>
+                <input type="date" name="dodatni_vlasnik_datum_rodenja_{{ broj }}" value="{{ vlasnik[2] }}"><br><br>
+
+                <label>Udio vlasništva (%):</label><br>
+                <input type="number" name="dodatni_vlasnik_udio_{{ broj }}" min="0" max="100" value="{{ vlasnik[7] }}"><br><br>
+
+                <label>Vrsta vlasništva:</label><br>
+                <input type="radio" name="dodatni_vlasnik_vrsta_vlasnistva_{{ broj }}" value="Izravni" {{ "checked" if vlasnik[6] == "Izravni" else "" }}> Izravni<br>
+                <input type="radio" name="dodatni_vlasnik_vrsta_vlasnistva_{{ broj }}" value="Neizravni" {{ "checked" if vlasnik[6] == "Neizravni" else "" }}> Neizravni<br>
+                <input type="radio" name="dodatni_vlasnik_vrsta_vlasnistva_{{ broj }}" value="Kontrolni položaj" {{ "checked" if vlasnik[6] == "Kontrolni položaj" else "" }}> Kontrolni položaj<br><br>
+
+                <label>Državljanstvo:</label><br>
+                <input type="text" name="dodatni_vlasnik_drzavljanstvo_{{ broj }}" value="{{ vlasnik[3] }}"><br><br>
+
+                <label>Ima li dodatni vlasnik drugo državljanstvo?</label><br>
+                <input type="radio" name="dodatni_vlasnik_drugo_drzavljanstvo_odabir_{{ broj }}" value="Ne" {{ "checked" if not vlasnik[4] or vlasnik[4] == "None" else "" }} onclick="document.getElementById('dodatni_drugo_drzavljanstvo_div_{{ broj }}').style.display='none'"> Ne<br>
+                <input type="radio" name="dodatni_vlasnik_drugo_drzavljanstvo_odabir_{{ broj }}" value="Da" {{ "checked" if vlasnik[4] and vlasnik[4] != "None" else "" }} onclick="document.getElementById('dodatni_drugo_drzavljanstvo_div_{{ broj }}').style.display='block'"> Da<br><br>
+                <div id="dodatni_drugo_drzavljanstvo_div_{{ broj }}" style="display:{{ 'block' if vlasnik[4] and vlasnik[4] != 'None' else 'none' }};">
+
+                <label>Drugo državljanstvo dodatnog vlasnika/osnivača:</label><br>
+                <input type="text" name="dodatni_vlasnik_drugo_drzavljanstvo_{{ broj }}" value="{{  '' if not vlasnik[4] or vlasnik[4] == 'None' else vlasnik[4] }}"><br><br>
+                </div>
+                <br>
+
+
+                <label>Država prebivališta:</label><br>
+                <input type="text" name="dodatni_vlasnik_drzava_prebivalista_{{ broj }}" value="{{ '' if vlasnik[5] is none else vlasnik[5] }}"><br><br>
+
+                <label>Politički izložena osoba?</label><br>
+                <input type="radio" name="dodatni_vlasnik_politicki_izlozena_{{ broj }}" value="Da" {{ "checked" if vlasnik[8] == 1 else "" }}> Da<br>
+                <input type="radio" name="dodatni_vlasnik_politicki_izlozena_{{ broj }}" value="Ne" {{ "checked" if vlasnik[8] != 1 else "" }}> Ne<br><br>
+
+                {% endfor %}
+            </div>
+            <button type="button" onclick="dodajDodatnogVlasnika()">Dodaj dodatnog vlasnika/osnivača</button><br><br>
+            <br>    
+            <script>
+                let brojDodatnihVlasnika = {{ dodatni_vlasnici|default([])|length }};
+                const maxDodatnihVlasnika = 3;
+
+                function dodajDodatnogVlasnika() {
+                    if (brojDodatnihVlasnika >= maxDodatnihVlasnika) {
+                        alert("Maksimalan broj dodatnih vlasnika/osnivača je 3.");
+                        return;
+                    }
+
+                    brojDodatnihVlasnika++;
+
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <h5>Dodatni vlasnik/osnivač ${brojDodatnihVlasnika}</h5>
+
+                        <label>Ime i prezime:</label><br>
+                        <input type="text" name="dodatni_vlasnik_ime_${brojDodatnihVlasnika}"><br><br>
+
+                        <label>OIB:</label><br>
+                        <input type="text" name="dodatni_vlasnik_OIB_${brojDodatnihVlasnika}" pattern="\\d{11}"><br><br>
+
+                        <label>Datum rođenja:</label><br>
+                        <input type="date" name="dodatni_vlasnik_datum_rodenja_${brojDodatnihVlasnika}"><br><br>
+
+                        <label>Udio vlasništva (%):</label><br>
+                        <input type="number" name="dodatni_vlasnik_udio_${brojDodatnihVlasnika}" min="0" max="100"><br><br>
+
+                        <label>Vrsta vlasništva:</label><br>
+                        <input type="radio" name="dodatni_vlasnik_vrsta_vlasnistva_${brojDodatnihVlasnika}" value="Izravni"> Izravni<br>
+                        <input type="radio" name="dodatni_vlasnik_vrsta_vlasnistva_${brojDodatnihVlasnika}" value="Neizravni"> Neizravni<br>
+                        <input type="radio" name="dodatni_vlasnik_vrsta_vlasnistva_${brojDodatnihVlasnika}" value="Kontrolni položaj"> Kontrolni položaj<br><br>
+
+                        <label>Državljanstvo:</label><br>
+                        <input type="text" name="dodatni_vlasnik_drzavljanstvo_${brojDodatnihVlasnika}"><br><br>
+
+                        <label>Ima li dodatni vlasnik drugo državljanstvo?</label><br>
+
+                        <input type="radio" name="dodatni_vlasnik_drugo_drzavljanstvo_odabir_${brojDodatnihVlasnika}" value="Ne" checked
+                            onclick="document.getElementById('dodatni_drugo_drzavljanstvo_div_${brojDodatnihVlasnika}').style.display='none'">Ne<br>
+
+                        <input type="radio" name="dodatni_vlasnik_drugo_drzavljanstvo_odabir_${brojDodatnihVlasnika}" value="Da"
+                            onclick="document.getElementById('dodatni_drugo_drzavljanstvo_div_${brojDodatnihVlasnika}').style.display='block'">Da<br>
+
+                        <div id="dodatni_drugo_drzavljanstvo_div_${brojDodatnihVlasnika}" style="display:none;">
+
+                            <label>Drugo državljanstvo dodatnog vlasnika/osnivača:</label><br>
+                            <input type="text" name="dodatni_vlasnik_drugo_drzavljanstvo_${brojDodatnihVlasnika}"><br><br>
+                        </div>
+
+                        <br>
+
+                        <label>Država prebivališta:</label><br>
+                        <input type="text" name="dodatni_vlasnik_drzava_prebivalista_${brojDodatnihVlasnika}"><br><br>
+
+                        <label>Politički izložena osoba?</label><br>
+                        <input type="radio" name="dodatni_vlasnik_politicki_izlozena_${brojDodatnihVlasnika}" value="Da"> Da<br>
+                        <input type="radio" name="dodatni_vlasnik_politicki_izlozena_${brojDodatnihVlasnika}" value="Ne"> Ne<br><br>
+                    `;
+
+                    document.getElementById('dodatni_vlasnik').appendChild(div);
+                }
+            </script>
+
+            <h2 class="naslov naslov-sekcije">5. Podaci o prodajnim mjestima</h2>
+
+            <p>Ako imate više prodajnih mjesta, dodajte ih klikom na gumb. Ukoliko nemate, ovaj dio možete preskočiti.</p>
+
+            <div id="prodajna_mjesta">
+
+                {% for mjesto in prodajna_mjesta %}
+                {% set broj = loop.index %}
+
+                <div class="prodajno_mjesto">
+                    <h6>Prodajno mjesto {{ broj }}</h6>
+
+                    <label>Naziv poslovnog prostora:</label><br>
+                    <input type="text" name="prodajno_mjesto_naziv_{{ broj }}" value="{{ mjesto[0] }}" required><br><br>
+
+                    <label>Adresa poslovnog prostora:</label><br>
+                    <input type="text" name="prodajno_mjesto_adresa_{{ broj }}" value="{{ mjesto[1] }}" required><br><br>
+
+                    <label>Kontakt osoba:</label><br>
+                    <input type="text" name="prodajno_mjesto_kontakt_osoba_{{ broj }}" value="{{ mjesto[2] }}" required><br><br>
+
+                    <label>Kontakt telefon:</label><br>
+                    <input type="text" name="prodajno_mjesto_kontakt_telefon_{{ broj }}" value="{{ mjesto[3] }}" required><br><br>
+
+                    <label>Kontakt email:</label><br>
+                    <input type="text" name="prodajno_mjesto_kontakt_email_{{ broj }}" value="{{ mjesto[4] }}" required><br><br>
+
+                    <label>Vrsta robe/usluga koja se prodaje:</label><br>
+                    <input type="text" name="prodajno_mjesto_vrsta_robe_usluga_{{ broj }}" value="{{ mjesto[5] }}" required><br><br>
+
+                    <label>Radi li se o sezonskoj blagajni:</label><br>
+                    <input type="radio" name="prodajno_mjesto_sezonska_{{ broj }}" value="Da"
+                    {{ "checked" if mjesto[6] == "Da" else "" }}> Da<br>
+
+                    <input type="radio" name="prodajno_mjesto_sezonska_{{ broj }}" value="Ne"
+                    {{ "checked" if mjesto[6] == "Ne" else "" }}> Ne<br><br>
+                </div>
+
+                {% endfor %}
+
+                {% if not prodajna_mjesta %}
+                <div class="prodajno_mjesto">
+                    <h6>Prodajno mjesto 1</h6>
+
+                    <label>Naziv poslovnog prostora:</label><br>
+                    <input type="text" name="prodajno_mjesto_naziv_1" required><br><br>
+
+                    <label>Adresa poslovnog prostora:</label><br>
+                    <input type="text" name="prodajno_mjesto_adresa_1" required><br><br>
+
+                    <label>Kontakt osoba:</label><br>
+                    <input type="text" name="prodajno_mjesto_kontakt_osoba_1" required><br><br>
+
+                    <label>Kontakt telefon:</label><br>
+                    <input type="text" name="prodajno_mjesto_kontakt_telefon_1" required><br><br>
+
+                    <label>Kontakt email:</label><br>
+                    <input type="text" name="prodajno_mjesto_kontakt_email_1" required><br><br>
+
+                    <label>Vrsta robe/usluga koja se prodaje:</label><br>
+                    <input type="text" name="prodajno_mjesto_vrsta_robe_usluga_1" required><br><br>
+
+                    <label>Radi li se o sezonskoj blagajni:</label><br>
+                    <input type="radio" name="prodajno_mjesto_sezonska_1" value="Da"> Da<br>
+                    <input type="radio" name="prodajno_mjesto_sezonska_1" value="Ne"> Ne<br><br>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <button type="button" onclick="dodajProdajnoMjesto()">Dodaj prodajno mjesto</button><br><br>
+
+            <script>
+                let brojProdajnihMjesta = {{ prodajna_mjesta|default([])|length if prodajna_mjesta else 1 }};
+                const maxProdajnihMjesta = 4;
+
+                function dodajProdajnoMjesto() {
+                    if (brojProdajnihMjesta >= maxProdajnihMjesta) {
+                        alert("Maksimalan broj prodajnih mjesta je 4.");
+                        return;
+                    }
+
+                    brojProdajnihMjesta++;
+
+                    const div = document.createElement('div');
+                    div.className = 'prodajno_mjesto';
+                    div.innerHTML = `
+                        <h6>Prodajno mjesto ${brojProdajnihMjesta}</h6>
+
+                        <label>Naziv poslovnog prostora:</label><br>
+                        <input type="text" name="prodajno_mjesto_naziv_${brojProdajnihMjesta}" required><br><br>
+
+                        <label>Adresa poslovnog prostora:</label><br>
+                        <input type="text" name="prodajno_mjesto_adresa_${brojProdajnihMjesta}" required><br><br>
+
+                        <label>Kontakt osoba:</label><br>
+                        <input type="text" name="prodajno_mjesto_kontakt_osoba_${brojProdajnihMjesta}" required><br><br>
+
+                        <label>Kontakt telefon:</label><br>
+                        <input type="text" name="prodajno_mjesto_kontakt_telefon_${brojProdajnihMjesta}" required><br><br>
+
+                        <label>Kontakt email:</label><br>
+                        <input type="text" name="prodajno_mjesto_kontakt_email_${brojProdajnihMjesta}" required><br><br>
+
+                        <label>Vrsta robe/usluga koja se prodaje:</label><br>
+                        <input type="text" name="prodajno_mjesto_vrsta_robe_usluga_${brojProdajnihMjesta}" required><br><br>
+
+                        <label>Radi li se o sezonskoj blagajni:</label><br>
+                        <input type="radio" name="prodajno_mjesto_sezonska_${brojProdajnihMjesta}" value="Da"> Da<br>
+                        <input type="radio" name="prodajno_mjesto_sezonska_${brojProdajnihMjesta}" value="Ne"> Ne<br><br>
+                    `;
+
+                    document.getElementById('prodajna_mjesta').appendChild(div);
+                }
+            </script>
+            <button class="gumb" type="submit"> Spremi podatke</button>
+        </form>
+
+    <img
+        src="{{ url_for('static', filename='logo.png') }}"
+        class="logo"
+        alt="T Business logo">
+
+    <script>
+        const forma = document.querySelector('form');
+        const datumIsteka = document.getElementById(
+            'kontakt_datum_isteka_osobne_iskaznice'
+        );
+
+        forma.addEventListener('submit', function(event) {
+            if (!datumIsteka.value) {
+                return;
+            }
+
+            const odabraniDatum = new Date(datumIsteka.value);
+            const danas = new Date();
+
+            danas.setHours(0, 0, 0, 0);
+            odabraniDatum.setHours(0, 0, 0, 0);
+
+            if (odabraniDatum <= danas) {
+                event.preventDefault();
+
+                datumIsteka.setCustomValidity(
+                    'Datum isteka osobne iskaznice mora biti nakon današnjeg datuma.'
+                );
+
+                datumIsteka.reportValidity();
+                datumIsteka.focus();
+            } else {
+                datumIsteka.setCustomValidity('');
+            }
+        });
+
+        datumIsteka.addEventListener('input', function() {
+            datumIsteka.setCustomValidity('');
+        });
+    </script>
+    </body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Detalji korisnika</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 16px;
+                margin: 25px;
+            }
+
+            .naslov {
+                color: rgb(226,0,116);
+                font-family: Arial, sans-serif;
+                font-weight: bold;
+            }
+
+            .naslov-glavni {
+                font-size: 36px;
+                margin-bottom: 25px;
+            }
+
+            .naslov-sekcije {
+                font-size: 24px;
+                margin-top: 30px;
+                margin-bottom: 15px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 25px;
+            }
+
+            th {
+                background-color: rgb(226,0,116);
+                color: white;
+                padding: 10px;
+            }
+
+            td {
+                padding: 10px;
+                border: 1px solid #dddddd;
+            }
+
+            tr:nth-child(even) {
+                background-color: #f8f8f8;
+            }
+
+            tr:hover {
+                background-color: #f3d6e5;
+            }
+            .gumb {
+                display: inline-block;
+                min-width: 120px;
+                padding: 8px 12px;
+                margin: 6px;
+                text-align: center;
+                text-decoration: none;
+                color: white;
+                background-color: rgb(226,0,116);
+                border: 1px solid rgb(190,0,98);
+                border-radius: 4px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                font-family: Arial, sans-serif;
+                box-sizing: border-box;
+            }
+
+            .gumb:hover {
+                background-color: rgb(190,0,98);
+                border-color: rgb(160,0,82);
+                color: white;
+            }
+            .logo {
+                position: fixed;
+                right: 20px;
+                bottom: 20px;
+                width: 140px;
+                height: auto;
+            }
+        </style>
+    </head>
+    <body>
+
+    <h1 class="naslov naslov-glavni">Detaljni pregled korisnika</h1>
+
+    <p>
+        <a class="gumb" href="/generiraj_spu2/{{ korisnik[0] }}/">Preuzmi SPU2 PDF</a>
+    </p>
+
+    <h2 class="naslov naslov-sekcije"> Osnovni podaci o tvrtki </h2>
+
+    <p><b>ID:</b> {{ korisnik[0] }}</p>
+    <p><b>Naziv tvrtke:</b> {{ korisnik[1] }}</p>
+    <p><b>OIB:</b> {{ korisnik[2] }}</p>
+    <p><b>Email:</b> {{ korisnik[3] }}</p>
+    <p><b>Telefon:</b> {{ korisnik[4] }}</p>
+    <p><b>Adresa:</b> {{ korisnik[5] }}</p>
+
+    <h2 class="naslov naslov-sekcije">Podaci o tvrtki</h2>
+    <table border="1">
+        {% for odgovor in odgovori %}
+            {% if odgovor[0] == "Naziv tvrtke/obrta" 
+            or odgovor[0] == "OIB tvrtke" 
+            or odgovor[0] == "NKD klasifikacija" 
+            or odgovor[0] == "IBAN" 
+            or odgovor[0] == "Matični broj" 
+            or odgovor[0] == "Adresa sjedišta" 
+            or odgovor[0] == "Prihvaćate li virtualne kartice" 
+            or odgovor[0] == "Odaberite izvor sredstava" 
+            or odgovor[0] == "Izvor sredstava - ostalo" 
+            or odgovor[0] == "Očekivani godišnji promet" 
+            or odgovor[0] == "Svrha poslovnog odnosa" 
+            or odgovor[0] == "Svrha poslovnog odnosa - ostalo" %}
+                
+                <tr>
+                    <td><b>{{ odgovor[0] }}</b></td>
+                    <td><b>{{ odgovor[1] }}</b></td>
+                </tr>
+
+            {% endif %}
+        {% endfor %}
+    </table>
+
+    <h2 class="naslov naslov-sekcije"> Podaci o kontakt osobi/ovlaštenoj osobi </h2>
+    <table border="1">
+        {% for odgovor in odgovori %}
+        {% if odgovor[0] == "Ime i prezime ovlaštene osobe" 
+            or odgovor[0] == "Email ovlaštene osobe" 
+            or odgovor[0] == "Telefon ovlaštene osobe" 
+            or odgovor[0] == "OIB ovlaštene osobe" 
+            or odgovor[0] == "Adresa prebivališta ovlaštene osobe"
+            or odgovor[0] == "Državljanstvo ovlaštene osobe"
+            or odgovor[0] == "Drugo državljanstvo ovlaštene osobe"
+            or odgovor[0] == "Datum rođenja ovlaštene osobe"
+            or odgovor[0] == "Funkcija ovlaštene osobe"
+            or odgovor[0] == "Broj osobne iskaznice ovlaštene osobe"
+            or odgovor[0] == "Datum isteka osobne iskaznice ovlaštene osobe"
+            or odgovor[0] == "Mjesto izdavanja osobne iskaznice ovlaštene osobe"
+             %}
+            <tr>
+                <td><b>{{ odgovor[0] }}</b></td>
+                <td><b>{{ odgovor[1] }}</b></td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+
+        <h2 class="naslov naslov-sekcije"> Podaci o vlasniku </h2>
+    <table border="1">
+        {% for odgovor in odgovori %}
+        {% if odgovor[0] == "Ime i prezime vlasnika"
+            or odgovor[0] == "OIB vlasnika"
+            or odgovor[0] == "Datum rođenja vlasnika"
+            or odgovor[0] == "Državljanstvo vlasnika"
+            or odgovor[0] == "Drugo državljanstvo vlasnika"
+            or odgovor[0] == "Država prebivališta vlasnika"
+            or odgovor[0] == "Vrsta vlasništva"
+            or odgovor[0] == "Udio vlasništva"
+            or odgovor[0] == "Je li vlasnik politički izložena osoba?"
+             %}
+            <tr>
+                <td><b>{{ odgovor[0] }}</b></td>
+                <td><b>{{ odgovor[1] }}</b></td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+
+    <h2 class="naslov naslov-sekcije"> Podaci o dodatnim vlasnicima/osnivačima </h2>
+
+    {%if dodatni_vlasnici %}
+     
+        {% for vlasnik in dodatni_vlasnici %}
+
+        <table border="1" style="margin-bottom: 20px;">
+            
+            <tr>
+                <td><b>Ime i prezime</b></td>
+                <td><b>{{ vlasnik[0] }}</b></td>
+            </tr>
+            <tr>
+                <td><b>OIB</b></td>
+                <td><b>{{ vlasnik[1] }}</b></td>
+            </tr>
+
+            <tr>
+                <td><b>Datum rođenja</b></td>
+                <td><b>{{ vlasnik[2] }}</b></td>
+            </tr>
+            
+            <tr>
+                <td><b>Državljanstvo</b></td>
+                <td><b>{{ vlasnik[3] }}</b></td>
+            </tr>
+
+            <tr>
+                <td><b>Drugo državljanstvo</b></td>
+                <td><b>{{ vlasnik[4] }}</b></td>
+            </tr>
+            <tr>
+                <td><b>Država prebivališta</b></td>
+                <td><b>{{ vlasnik[5] }}</b></td>    
+            </tr>
+
+            <tr>
+                <td><b>Vrsta vlasništva</b></td>
+                <td><b>{{ vlasnik[6] }}</b></td>    
+            </tr>
+
+            <tr>
+                <td><b>Udio vlasništva (%)</b></td>
+                <td><b>{{ vlasnik[7] }}</b></td>
+            </tr>
+
+            
+            <tr>
+                <td><b>Politčki izložena osoba</b></td>
+                <td>
+                    {% if vlasnik[8] == 1 %}
+                        <b>Da</b>
+                    {% else %}
+                        <b>Ne</b>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+        {% endfor %}
+    {% else %}
+        <p>Nema dodatnih vlasnika/osnivača.</p>
+    {% endif %}
+
+    <h2 class="naslov naslov-sekcije"> Podaci o prodajnim mjestima </h2>
+
+    {% if prodajna_mjesta %}
+    
+        {% for mjesto in prodajna_mjesta %}
+            <table border="1" style="margin-bottom: 20px;">
+                <tr>
+                    <td><b>Naziv prodajnog mjesta</b></td>
+                    <td><b>{{ mjesto[0] }}</b></td>
+                </tr>
+                <tr>
+                    <td><b>Adresa prodajnog mjesta</b></td>
+                    <td><b>{{ mjesto[1] }}</b></td>
+                </tr>
+                <tr>
+                    <td><b>Kontakt osoba</b></td>
+                    <td><b>{{ mjesto[2] }}</b></td>
+                </tr>
+                <tr>
+                    <td><b>Vrsta robe/usluga</b></td>
+                    <td><b>{{ mjesto[3] }}</b></td>
+                </tr>
+                <tr>
+                    <td><b>Email</b></td>
+                    <td><b>{{ mjesto[4] }}</b></td>
+                </tr>
+                <tr>
+                    <td><b>Telefon</b></td>
+                    <td><b>{{ mjesto[5] }}</b></td>
+                </tr>
+                <tr>
+                    <td><b>Sezonska blagajna</b></td>
+                    <td><b>{{ mjesto[6] }}</b></td>
+                </tr>
+            </table>
+        {% endfor %}
+    
+    {% else %}
+        <p>Nema prodajnih mjesta.</p>
+    {% endif %}
+            
+ 
+    <br>
+    <a class="gumb" href="/admin">Nazad na pregled korisnika</a>
+    <br>
+    <img
+        src="{{ url_for('static', filename='logo.png') }}"
+        class="logo"
+        alt="T Business logo"
+    >
+    </body>
+</html>

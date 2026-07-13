@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Admin pregled</title>
+    </head>
+    <body>
+        <h1>Admin pregled podataka</h1>
+        <table border="1">
+            <tr>
+                <th>ID</th>
+                <th>Naziv tvrtke</th>
+                <th>OIB</th>
+                <th>IBAN</th>
+                <th>Adresa sjedišta</th>
+                <th>Kontakt osoba</th>
+                <th>Email</th>
+                <th>Telefon</th>
+                <th>Vlasnik</th>
+                <th>Sezonski POS</th>
+                <th>POS druga institucija</th>
+            </tr>
+
+            {% for red in podaci %}
+
+            <tr>
+                <td>{{ red[0] }}</td>
+                <td>{{ red[1] }}</td>
+                <td>{{ red[2] }}</td>
+                <td>{{ red[3] }}</td>
+                <td>{{ red[4] }}</td>
+                <td>{{ red[5] }}</td>
+                <td>{{ red[6] }}</td>
+                <td>{{ red[7] }}</td>
+                <td>{{ red[8] }}</td>
+                <td>{{ red[9] }}</td>
+                <td>{{ red[10] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <a href="/">Nazad na formu</a>
+    </body>
+</html>

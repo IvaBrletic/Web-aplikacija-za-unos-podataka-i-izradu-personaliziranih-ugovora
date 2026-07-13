@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Admin pregled</title>
+        <style>
+            .gumb {
+                display: inline-block;
+                width: 100px;
+                padding: 8px 12px;
+                margin: 6px;
+                text-align: center;
+                text-decoration: none;
+                color: white;
+                background-color: rgb(226,0,116);
+                border: 1px solid rgb(190,0,98);
+                border-radius: 4px;
+                font-size: 13px;
+                font-weight:bold;
+                cursor: pointer;
+                font-family: Arial, sans-serif;
+                box-sizing: border-box;
+            }
+
+            .gumb:hover{
+                background:rgb(190,0,98);
+                border-color:rgb(160,0,82);
+                color:white;
+            }
+            button.gumb{
+                appearance:none;
+                -webkit-appearance:none;
+            }
+            .gumb-form{
+                display:inline;
+                margin:0;
+            }
+
+            .naslov {
+                color: rgb(226, 0, 116) !important;
+                font-family: Arial, sans-serif;
+                font-weight: bold;
+            }
+
+            .naslov-glavni {
+                font-size: 36px;
+                margin-bottom: 25px;
+            }
+
+            .naslov-sekcije {
+                font-size: 24px;
+                margin-top: 30px;
+                margin-bottom: 15px;
+            }
+            
+           body {
+                font-family: Arial, sans-serif;
+                font-size: 16px;
+            }
+
+            table {
+                border-collapse: collapse;
+                font-size: 16px;
+            }
+
+            th,
+            td {
+                padding: 10px;
+                vertical-align: middle;
+            }
+
+            label {
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            input,
+            select {
+                font-size: 16px;
+                padding: 6px;
+            }
+
+            button {
+                font-size: 16px;
+            } 
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+                font-size: 16px;
+            }
+
+            th {
+                background-color: rgb(226,0,116);
+                color: white;
+                padding: 12px;
+                text-align: center;
+                border: 1px solid rgb(190,0,98);
+            }
+
+            td {
+                padding: 10px;
+                border: 1px solid #dddddd;
+                vertical-align: middle;
+            }
+
+            tr:nth-child(even) {
+                background-color: #f8f8f8;
+            }
+
+            tr:hover {
+                background-color: #f3d6e5;
+            }
+            .pretraga {
+                width: 220px;
+            }
+
+            .pretraga-gumb {
+                margin-left: 5px;
+            }
+
+            .pretraga-link {
+                margin-left: 10px;
+                color: rgb(226,0,116);
+                font-weight: bold;
+                text-decoration: none;
+            }
+
+            .pretraga-link:hover {
+                text-decoration: underline;
+            }
+            h1 {
+                margin-bottom: 20px;
+            }
+
+            form {
+                margin-bottom: 25px;
+            }
+            .stupac-detalji {
+                text-align: center;
+                white-space: nowrap;
+            }
+            .logo {
+                position: fixed;
+                right: 20px;
+                bottom: 20px;
+                width: 140px;
+                height: auto;
+            }
+        </style>
+    </head>
+
+    
+
+    <body>
+        <h1 class="naslov naslov-glavni">Admin pregled podataka</h1>
+        <p>
+            Prijavljeni ste kao:
+            <b>{{ session.get('admin_korisnicko_ime') }}</b>
+
+            <a class="gumb" href="/admin/logout">
+                Odjava
+            </a>
+        </p>
+        <form method="get" action="/admin">
+            <label>Pretraga po OIB-u:</label>
+            <input
+                class="pretraga"
+                type="text"
+                name="oib"
+                value="{{ oib_pretraga }}"
+                placeholder="Unesite OIB">
+
+            <button class="gumb pretraga-gumb" type="submit">
+                Pretraži
+            </button>
+
+            <a class="pretraga-link" href="/admin">
+                Prikaži sve
+            </a>
+        </form>
+
+        <br>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Naziv tvrtke</th>
+                <th>OIB</th>
+                <th>Email</th>
+                <th>Kontakt telefon</th>
+                <th>Županija</th>
+                <th>Mjesto</th>
+                <th class="stupac-detalji">Detalji</th>
+            </tr>
+
+            {% for red in podaci %}
+
+            <tr>
+                <td>{{ red[0] }}</td>
+                <td>{{ red[1] }}</td>
+                <td>{{ red[2] }}</td>
+                <td>{{ red[3] }}</td>
+                <td>{{ red[4] }}</td>
+                <td>{{ red[5] }}</td>
+                <td>{{ red[6] }}</td>
+                <td class="stupac-detalji">
+                    <a class="gumb" href="/admin/korisnik/{{ red[0] }}"> Detalji</a>
+                    
+                    <a class="gumb" href="/admin/korisnik/{{ red[0] }}/uredi">Uredi</a>
+                    
+
+                    <form class="gumb-form" action="/admin/korisnik/{{ red[0] }}/obrisi" method="post">
+                        <button class="gumb" type="submit" onclick="return confirm('Jeste li sigurni da želite obrisati ovog korisnika?')">
+                            Obriši
+                        </button>
+                    </form>
+                </td> 
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <a class="gumb" href="/">Nazad</a>
+    <img
+        src="{{ url_for('static', filename='logo.png') }}"
+        class="logo"
+        alt="T Business logo">
+
+    </body>
+</html>

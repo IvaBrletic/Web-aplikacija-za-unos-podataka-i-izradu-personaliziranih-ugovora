@@ -1,0 +1,336 @@
+from flask import Flask, render_template, request
+import sqlite3
+
+app = Flask(__name__)
+
+def kreiraj_bazu():
+    conn = sqlite3.connect ("ugovori.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS zupanije(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        naziv TEXT NOT NULL
+    )
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS mjesta(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        naziv TEXT NOT NULL,
+        postanski_broj TEXT NOT NULL,
+        zupanija_id INTEGER,
+        FOREIGN KEY (zupanija_id) REFERENCES zupanije(id)
+        )
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS korisnici(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ime TEXT NOT NULL,
+        prezime TEXT NOT NULL,
+        naziv_tvrtke TEXT NOT NULL,
+        oib TEXT NOT NULL,
+        datum_rodjenja TEXT NOT NULL,
+        email TEXT NOT NULL,
+        telefon TEXT NOT NULL,
+        adresa TEXT NOT NULL,
+        zupanija_id INTEGER,
+        mjesto_id INTEGER,
+        FOREIGN KEY (zupanija_id) REFERENCES zupanije(id),
+        FOREIGN KEY (mjesto_id) REFERENCES mjesta(id)
+    )
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS vrste_ugovora(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        naziv TEXT NOT NULL,
+        opis TEXT 
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS ugovori(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        klijent_id INTEGER,
+        vrsta_ugovora_id INTEGER,
+        datum_potpisa TEXT NOT NULL,
+        FOREIGN KEY (klijent_id) REFERENCES korisnici(id),
+        FOREIGN KEY (vrsta_ugovora_id) REFERENCES vrste_ugovora(id)
+    )
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS pitanja(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tekst TEXT NOT NULL,
+        tip_polja TEXT NOT NULL,
+        obavezno INTEGER
+    )
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS ugovori_pitanja(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        vrsta_ugovora_id INTEGER,
+        pitanje_id INTEGER,
+        redoslijed INTEGER,
+        FOREIGN KEY (vrsta_ugovora_id) REFERENCES vrste_ugovora(id),
+        FOREIGN KEY (pitanje_id) REFERENCES pitanja(id)
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS odgovori(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        korisnik_id INTEGER,
+        ugovor_id INTEGER,
+        pitanje_id INTEGER,
+        odgovor TEXT,
+        FOREIGN KEY (korisnik_id) REFERENCES korisnici(id),
+        FOREIGN KEY (ugovor_id) REFERENCES ugovori(id),
+        FOREIGN KEY (pitanje_id) REFERENCES pitanja(id)
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS predlosci(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ugovor_id INTEGER,
+        naziv TEXT NOT NULL,
+        putanja_datoteke TEXT,
+        FOREIGN KEY (ugovor_id) REFERENCES ugovori(id)
+    )
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS logovi(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        korisnik_id INTEGER,
+        aktivnost TEXT,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (korisnik_id) REFERENCES korisnici(id)
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+
+def unesi_pocetne_podatke():
+    conn = sqlite3.connect("ugovori.db")
+    cursor = conn.cursor()
+
+    #vrste ugovora
+    cursor.execute("""
+    
+    INSERT OR IGNORE INTO vrste_ugovora (id, naziv, opis) 
+    VALUES (1, "SPU2", "Upitnik za prihvaćanje platnih transakcija")
+    """)
+
+    cursor.execute("""
+    INSERT OR IGNORE INTO vrste_ugovora (id, naziv, opis)
+    VALUES (2, "Posebne odredbe", "Posebne odredbe okvirnog ugovora")
+    """)
+
+    #pitanja iz forme
+    pitanja = [
+        ("naziv","Naziv tvrtke/obrta", "text", 1),
+        ("oib","OIB tvrtke", "text", 1),
+        ("nkdklasifikacija","NKD klasifikacija", "text", 1),
+        ("iban","IBAN", "text", 1),
+        ("maticni_broj","Matični broj", "text", 1),
+        ("adresa_sjedista","Adresa sjedišta", "text", 1),
+        ("virtualne_kartice","Prihvaćate li virtualne kartice?", "radio", 0),
+        ("izvor_sredstava","Odaberite izvor sredstava", "checkbox", 0),
+        ("izvor_ostalo","Izvor sredstava - ostalo", "text", 0),
+        ("promet","Očekivani godišnji promet", "radio", 0),
+        ("svrha","Svrha poslovnog odnosa", "checkbox", 0),
+        ("svrha_ostalo","Svrha poslovnog odnosa - ostalo", "text", 0),
+        ("kontakt_ime","Ime i prezime kontakt osobe", "text", 1),
+        ("kontakt_email","Email kontakt osobe", "email", 1),
+        ("kontakt_telefon","Telefon kontakt osobe", "text", 1),
+        ("vlasnik_ime","Ime i prezime ovlaštene osobe", "text", 1),
+        ("vlasnik_adresa","Adresa prebivališta ovlaštene osobe", "text", 1),
+        ("vlasnik_drzavljanstvo","Državljanstvo ovlaštene osobe", "text", 1),
+        ("vlasnik_OIB","OIB ovlaštene osobe", "text", 1),
+        ("vlasnik_telefon","Telefon ovlaštene osobe", "text", 1),
+        ("vlasnik_broj_osobne_iskaznice","Broj osobne iskaznice ovlaštene osobe", "text", 1),
+        ("vlasnik_datum_isteka_osobne_iskaznice","Datum isteka osobne iskaznice ovlaštene osobe", "date", 1),
+        ("vlasnik_mjesto_izdavanja_osobne_iskaznice","Mjesto izdavanja osobne iskaznice ovlaštene osobe", "text", 1),
+        ("vlasnik_datum_rodenja","Datum rođenja ovlaštene osobe", "date", 1),
+        ("vlasnik_funkcija","Funkcija ovlaštene osobe", "text", 1),
+        ("vlasnik_udio_vlasnistva","Udio vlasništva", "number", 1),
+        ("vlasnik_politicki_izlozena","Jeste li politički izložena osoba?", "radio", 0),
+        ("poslovni_prostor_naziv","Naziv poslovnog prostora", "text", 1),
+        ("poslovni_adresa","Adresa poslovnog prostora", "text", 1),
+        ("poslovni_prostor_vrsta_robe_usluga","Vrsta robe/usluga", "text", 1),
+        ("poslovni_prostor_sezonska_blagajna","Sezonska blagajna:", "radio", 0),
+        ("poslovni_prostor_pos_terminal","POS terminal druge institucije", "radio", 0),
+        ("poslovni_prostor_banka_institucija","Naziv banke/institucije (ako je prethodno pitanje Da)", "text", 0)
+    ]
+
+    for i, (sifra, tekst, tip, obavezno) in enumerate(pitanja, start=1):
+        cursor.execute("""
+            INSERT or IGNORE INTO pitanja (id, tekst, tip_polja, obavezno)
+            VALUES (?,?,?,?)
+        """, (i, tekst, tip, obavezno))
+
+        cursor.execute("""
+            INSERT or IGNORE INTO ugovori_pitanja (vrsta_ugovora_id, pitanje_id, redoslijed)
+            VALUES (1,?,?)
+        """, (i, i))
+
+    conn.commit()
+    conn.close()
+
+@app.route("/")
+def forma():
+    return render_template("forma.html")
+
+@app.route("/spremi", methods=["POST"])
+def spremi():
+    podaci = request.form
+
+    #OIB validacija
+    oib = podaci.get("oib")
+    if not oib or not oib.isdigit() or len(oib) != 11:
+        return "Neispravan OIB. OIB mora imati 11 znamenki i sadržavati samo brojeve."
+
+    oib_vlasnika = podaci.get("vlasnik_OIB")
+    if not oib_vlasnika or not oib_vlasnika.isdigit() or len(oib_vlasnika) != 11:
+        return "Neispravan OIB. OIB mora imati 11 znamenki i sadržavati samo brojeve."
+    
+    conn = sqlite3.connect("ugovori.db")
+    cursor = conn.cursor()
+
+    # 1. Spremamo županiju sjedišta
+    zupanija_sjedista = podaci.get("zupanija_sjedista")
+    cursor.execute("INSERT OR IGNORE INTO zupanije (naziv) VALUES (?)", (zupanija_sjedista,))
+    cursor.execute("SELECT id FROM zupanije WHERE naziv = ?", (zupanija_sjedista,))
+    zupanija_id = cursor.fetchone()[0]
+
+    # 2. Spremamo mjesto sjedišta
+    mjesto_sjedista = podaci.get("mjesto_sjedista")
+    cursor.execute("INSERT OR IGNORE INTO mjesta (naziv, postanski_broj, zupanija_id) VALUES (?, ?, ?)", (mjesto_sjedista, podaci.get("postanski_broj"), zupanija_id))
+    cursor.execute("SELECT id FROM mjesta WHERE naziv = ? AND postanski_broj = ? AND zupanija_id = ?", (mjesto_sjedista, podaci.get("postanski_broj"), zupanija_id))
+    mjesto_id = cursor.fetchone()[0]
+
+    # 3. Spremamo korisnika
+    cursor.execute("""
+        INSERT INTO korisnici (
+        ime, prezime, naziv_tvrtke, oib, datum_rodjenja, email, telefon, adresa, zupanija_id, mjesto_id
+        ) VALUES (?,?,?,?,?,?,?,?,?,?)
+    """, (
+        podaci.get("vlasnik_ime"),
+        "",
+        podaci.get("naziv"),
+        oib,
+        podaci.get("vlasnik_datum_rodenja"),
+        podaci.get("kontakt_email"),
+        podaci.get("kontakt_telefon"),
+        podaci.get("adresa_sjedista"),
+        zupanija_id,   
+        mjesto_id   
+    ))
+
+    korisnik_id = cursor.lastrowid  # Dohvaćamo ID novog korisnika
+
+    # 4.Spremamo ugovor
+    cursor.execute("""
+        INSERT INTO ugovori (klijent_id, vrsta_ugovora_id, datum_potpisa)
+        VALUES (?,?,DATE('now'))
+    """, (korisnik_id, 1))  # Pretpostavljamo da je vrsta_ugovora_id 1 za SPU2
+
+    ugovor_id = cursor.lastrowid  # Dohvaćamo ID novog ugovora
+
+    # 5. Spremamo odogovre iz forme
+    cursor.execute("SELECT id, tekst FROM pitanja")
+    pitanja = cursor.fetchall()
+
+    mapa={
+        "Naziv tvrtke/obrta":"naziv",
+        "OIB tvrtke":"oib",  
+        "NKD klasifikacija":"nkdklasifikacija",    
+        "IBAN":"iban",
+        "Matični broj":"maticni_broj",
+        "Adresa sjedišta":"adresa_sjedista",
+        "Prihvaćate li virtualne kartice?":"virtualne_kartice",
+        "Odaberite izvor sredstava":"izvor_sredstava",
+        "Izvor sredstava - ostalo":"izvor_ostalo",
+        "Očekivani godišnji promet":"promet",
+        "Svrha poslovnog odnosa":"svrha",
+        "Ime i prezime kontakt osobe":"kontakt_ime",
+        "Email kontakt osobe":"kontakt_email",
+        "Telefon kontakt osobe":"kontakt_telefon",
+        "Ime i prezime ovlaštene osobe":"vlasnik_ime",
+        "OIB ovlaštene osobe":"vlasnik_OIB",
+        "Adresa prebivališta ovlaštene osobe":"vlasnik_adresa",
+        "Državljanstvo ovlaštene osobe":"vlasnik_drzavljanstvo",
+        "Telefon ovlaštene osobe":"vlasnik_telefon",
+        "Broj osobne iskaznice ovlaštene osobe":"vlasnik_broj_osobne_iskaznice",
+        "Datum isteka osobne iskaznice ovlaštene osobe":"vlasnik_datum_isteka_osobne_iskaznice",
+        "Mjesto izdavanja osobne iskaznice ovlaštene osobe":"vlasnik_mjesto_izdavanja_osobne_iskaznice",
+        "Datum rođenja ovlaštene osobe":"vlasnik_datum_rodenja",
+        "Funkcija ovlaštene osobe":"vlasnik_funkcija",
+        "Udio vlasništva":"vlasnik_udio_vlasnistva",
+        "Jeste li politički izložena osoba?":"vlasnik_politicki_izlozena",
+        "Naziv poslovnog prostora":"poslovni_prostor_naziv",
+        "Adresa poslovnog prostora":"poslovni_adresa",
+        "Vrsta robe/usluga":"poslovni_prostor_vrsta_robe_usluga",
+        "Sezonska blagajna:":"poslovni_prostor_sezonska_blagajna",
+        "POS terminal druge institucije":"poslovni_prostor_pos_terminal",
+        "Naziv banke/institucije (ako je prethodno pitanje Da)":"poslovni_prostor_banka_institucija"
+    }
+
+    for pitanje_id, tekst_pitanja in pitanja:
+        if tekst_pitanja == "Odaberite izvor sredstava":
+            odgovor = ", ".join(podaci.getlist("izvor_sredstava"))
+        elif tekst_pitanja == "Svrha poslovnog odnosa":
+            odgovor = ", ".join(podaci.getlist("svrha"))
+        else:
+            naziv_polja = mapa.get(tekst_pitanja)
+            odgovor = podaci.get(naziv_polja,"") if naziv_polja else ""
+
+        cursor.execute("""
+            INSERT INTO odgovori (korisnik_id, ugovor_id, pitanje_id, odgovor)            VALUES (?,?,?,?)
+        """, (korisnik_id, ugovor_id, pitanje_id, odgovor))
+
+    
+    # 6. Log
+    cursor.execute("""
+        INSERT INTO logovi (korisnik_id, aktivnost)
+        VALUES (?,?)
+    """, (korisnik_id, "Korisnik je ispunio formu i kreiran je novi ugovor"))
+
+    conn.commit()
+    conn.close()
+
+    return """
+    <h2>"Podaci su uspješno spremljeni!" <h2>
+    <p>Korisnik, ugovor i odgovori su spremljeni u bazu podataka. Također je zabilježen log aktivnosti.</p>
+    <a href="/">Povratak na formu</a><br>
+    <a href="/admin">Pogledaj sve unose</a>
+    """
+
+@app.route("/admin")
+def admin():
+    conn = sqlite3.connect("ugovori.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT 
+        korisnici.ime, korisnici.prezime, korisnici.naziv_tvrtke, korisnici.oib, korisnici.datum_rodjenja, korisnici.email, korisnici.telefon, korisnici.adresa,
+        zupanije.naziv AS zupanija, mjesta.naziv AS mjesto, mjesta.postanski_broj,
+        ugovori.datum_potpisa, vrste_ugovora.naziv AS vrsta_ugovora
+    FROM korisnici
+    LEFT JOIN zupanije ON korisnici.zupanija_id = zupanije.id
+    LEFT JOIN mjesta ON korisnici.mjesto_id = mjesta.id
+    LEFT JOIN ugovori ON korisnici.id = ugovori.klijent_id
+    LEFT JOIN vrste_ugovora ON ugovori.vrsta_ugovora_id = vrste_ugovora.id
+    """)
+
+    podaci = cursor.fetchall()
+
+    conn.close()
+
+    return render_template("admin.html", podaci=podaci)
+
+if __name__ == "__main__":
+    kreiraj_bazu()
+    unesi_pocetne_podatke()
+    app.run(debug=True)

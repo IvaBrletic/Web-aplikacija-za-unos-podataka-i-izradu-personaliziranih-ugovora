@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <title>Prijava administratora</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .login-okvir {
+            width: 360px;
+            margin: 100px auto;
+            padding: 30px;
+            background-color: white;
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+        }
+
+        .naslov {
+            color: rgb(226, 0, 116);
+            text-align: center;
+            margin-top: 0;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 9px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        .gumb {
+            width: 100%;
+            padding: 10px;
+            color: white;
+            background-color: rgb(226, 0, 116);
+            border: 1px solid rgb(190, 0, 98);
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .gumb:hover {
+            background-color: rgb(190, 0, 98);
+        }
+
+        .greska {
+            padding: 10px;
+            margin-bottom: 15px;
+            color: #a00000;
+            background-color: #ffe5e5;
+            border: 1px solid #cc0000;
+            border-radius: 4px;
+        }
+        .logo {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 140px;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-okvir">
+    <h1 class="naslov">Admin prijava</h1>
+
+    {% if greska %}
+        <div class="greska">
+            {{ greska }}
+        </div>
+    {% endif %}
+
+    <form method="post" action="/admin/login">
+
+        <label for="korisnicko_ime">
+            Korisničko ime:
+        </label>
+
+        <input
+            type="text"
+            id="korisnicko_ime"
+            name="korisnicko_ime"
+            required
+            autofocus
+        >
+
+        <br><br>
+
+        <label for="lozinka">
+            Lozinka:
+        </label>
+
+        <input
+            type="password"
+            id="lozinka"
+            name="lozinka"
+            required
+        >
+
+        <br><br>
+
+        <button class="gumb" type="submit">
+            Prijavi se
+        </button>
+    <img
+        src="{{ url_for('static', filename='logo.png') }}"
+        class="logo"
+        alt="T Business logo">
+    </form>
+</div>
